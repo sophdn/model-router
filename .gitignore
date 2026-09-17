@@ -1,0 +1,7 @@
+# Built binaries
+/routerdemo
+/cmd/routerdemo/routerdemo
+
+# Go workspace files
+go.work
+go.work.sum
