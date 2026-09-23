@@ -67,6 +67,7 @@ Emitting telemetry or escalation events is the caller's job, not the router's.
 |---------------|---------------------------------------------------------------------------|
 | `router`      | The ladder and the escalation state machine.                              |
 | `modeltypes`  | The `Adapter` interface, the message/response value types, the fault taxonomy, and the `Echo` test fake. |
+| `adapters`    | Real `Adapter` implementations — `OpenAICompat` (a local llama.cpp server or any OpenAI-compatible endpoint) and `Anthropic` — plus the `FaultOf` helper that recovers a fault kind from a failed call. |
 | `tool`        | The provider-agnostic tool-call and tool-result types plus an error tally. |
 | `cost`        | A price table and per-tier classifier, a running ledger, and shared spend/turn budgets. |
 | `laddercfg`   | Pure ladder-sizing policy: context-window budgets and rung-proportional round budgets. |
@@ -85,6 +86,37 @@ go run ./cmd/routerdemo
 The demo builds a local/mid/strong ladder of fake adapters and prints three
 scenarios: a cheap request that stays on the local tier, a fault that escalates one
 tier, and a frontier rung that refuses a climb once its per-session cap is spent.
+
+## Real models
+
+The demo above uses fakes. To route real models, the `adapters` package ships two
+`modeltypes.Adapter` implementations: `OpenAICompat` for a local llama.cpp server
+or any OpenAI-compatible endpoint, and `Anthropic` for the Messages API. You build
+one from a struct literal and hand it to the router in place of a fake.
+
+`cmd/routerdemo-live` does exactly that, building a ladder from environment
+variables:
+
+```sh
+# a local llama.cpp server as the cheap tier
+export LLAMA_BASE_URL=http://localhost:8081/v1
+export LLAMA_MODEL=your-served-model
+
+# Anthropic as the fallback tier
+export ANTHROPIC_API_KEY=sk-ant-...
+export ANTHROPIC_MODEL=claude-haiku-4-5-20251001
+
+go run ./cmd/routerdemo-live
+```
+
+Each rung is optional. The command runs a real turn on the cheapest rung; with a
+second rung set it simulates a context-overflow fault and shows the real fallback.
+With neither variable set it prints what to set and exits non-zero.
+
+Wiring your own loop is the same shape: construct the adapters cheapest to
+strongest, pass them to `router.NewLadder`, and drive the turns. When a call
+fails, recover its fault kind with `adapters.FaultOf(err)` and pass it to
+`router.EscalateForFault`, which is how a real loop climbs the ladder on a fault.
 
 ## Provenance
 
