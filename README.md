@@ -126,3 +126,7 @@ types were lifted out as a coherent subset and given clean package paths so the
 routing engine can stand on its own with zero dependencies. The escalation policy
 and the cost model are the real ones the larger system uses; the model ids and
 prices in the cost table are examples you would replace with your own.
+
+The `adapters` package and `cmd/routerdemo-live` are written for this repository,
+not lifted from the private system, which keeps its real adapters internal. They
+are hand-owned here: a future sync of the extracted core leaves them untouched.

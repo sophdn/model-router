@@ -8,6 +8,10 @@
 // taxonomy through a *FaultError, so the caller recovers the kind with FaultOf and
 // hands it to router.EscalateForFault. Everything else — an ordinary non-2xx — is a
 // plain error whose FaultOf is FaultNone (fatal to the turn).
+//
+// This package is written for this public repository rather than extracted from
+// the private system it came out of, so a sync of the extracted core leaves it in
+// place.
 package adapters
 
 import (
