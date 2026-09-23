@@ -44,9 +44,10 @@ Good result: exits 0 with no output.
 go test ./...
 ```
 
-Good result: every package line reads `ok`, except `jobprofile`, which has no tests
-of its own and reads `[no test files]`. There is no network call and no timing
-dependency, so a green run should be immediate and repeatable.
+Good result: every package line reads `ok`, except the two `cmd/` demo mains
+(`cmd/routerdemo` and `cmd/routerdemo-live`), which carry no tests of their own and
+read `[no test files]`. There is no network call and no timing dependency, so a
+green run should be immediate and repeatable.
 
 If you want to see each test name as it runs:
 
@@ -64,8 +65,12 @@ Good result: three labelled scenarios print to stdout.
 
 1. **A cheap request stays on the local tier.** The router serves the free
    `qwen3.8-27b` local model and a clean turn produces no transition.
-2. **A model-call fault escalates one tier.** A context-overflow fault moves the
-   router from the local model up to the mid model, and the next turn runs there.
+2. **A model-call fault escalates one tier.** A context-overflow fault the loop
+   cannot compact away moves the router from the local model up to the mid model,
+   and the next turn runs there. The printed edge reads
+   `trigger=retry_exhaustion: model_call_fault=context_overflow`: the fault kind is
+   the context overflow, and `retry_exhaustion` is the closed-taxonomy escalation
+   trigger it maps onto.
 3. **The frontier rung is usage-capped.** After two tool-error turns the router
    reaches the frontier model. It serves one bounded turn, and the next climb is
    refused and bounced down to the mid tier. The final line reports one frontier
