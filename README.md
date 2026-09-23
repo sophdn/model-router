@@ -83,6 +83,10 @@ go test ./...
 go run ./cmd/routerdemo
 ```
 
+The tests are sans-IO and hold a 95% statement-coverage floor over the logic
+packages (currently 98.7%). The two `cmd/` demo mains are thin drivers and are
+excluded from the floor.
+
 The demo builds a local/mid/strong ladder of fake adapters and prints three
 scenarios: a cheap request that stays on the local tier, a fault that escalates one
 tier, and a frontier rung that refuses a climb once its per-session cap is spent.
