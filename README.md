@@ -85,7 +85,14 @@ go run ./cmd/routerdemo
 
 The tests are sans-IO and hold a 95% statement-coverage floor over the logic
 packages (currently 98.7%). The two `cmd/` demo mains are thin drivers and are
-excluded from the floor.
+excluded from the floor. Reproduce the figure with:
+
+```sh
+go test $(go list ./... | grep -v /cmd/) -coverprofile=cover.out && go tool cover -func=cover.out | tail -1
+```
+
+A whole-tree `go test ./...` prints a lower number (about 89%) because it counts
+the two excluded `cmd/` demo mains at 0%.
 
 The demo builds a local/mid/strong ladder of fake adapters and prints three
 scenarios: a cheap request that stays on the local tier, a fault that escalates one
